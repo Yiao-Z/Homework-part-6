@@ -1,0 +1,18 @@
+CREATE DATABASE IF NOT EXISTS oosd_webappdev;
+USE oosd_webappdev;
+
+CREATE TABLE IF NOT EXISTS students (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  first_name VARCHAR(100) NOT NULL,
+  last_name VARCHAR(100) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  phone VARCHAR(30),
+  street_address VARCHAR(255) NOT NULL,
+  city VARCHAR(100) NOT NULL,
+  province_state VARCHAR(100) NOT NULL,
+  country VARCHAR(100) NOT NULL,
+  postal_code VARCHAR(12) NOT NULL,
+  program VARCHAR(120) NOT NULL,
+  `year` VARCHAR(20) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;

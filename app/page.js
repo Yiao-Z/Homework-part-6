@@ -1,69 +1,175 @@
-import Image from "next/image";
+import { Suspense } from "react";
+import Link from "next/link";
+import { connection } from "next/server";
+import StudentCard from "../components/StudentCard";
+import WeatherCard from "../components/WeatherCard";
+import { getAllStudents, getStudentStats } from "../lib/students";
 
-export default function Home() {
+const studentPhotos = [
+  "/students/360_F_590807804_e0FgoICXHSfohQf0mtVyvjK6iiDNhjkU.jpg",
+  "/students/headshot-smiling-confident-african-american-teen-college-student-with-eyeglasses-looking-camera-vertical-image-education-conc.avif",
+  "/students/images.jpg",
+  "/students/istockphoto-1395838909-612x612.jpg",
+  "/students/pngtree-asian-man-portrait-png-image_21237848.png",
+  "/students/portrait-smiling-young-man_1268-21877.avif",
+];
+
+async function DashboardContent() {
+  await connection();
+
+  const [students, stats] = await Promise.all([
+    getAllStudents(),
+    getStudentStats(),
+  ]);
+
+  const metrics = [
+    {
+      label: "Total students",
+      value: stats.totalStudents,
+      detail: "Students in the directory",
+      icon: "ST",
+      tone: "blue",
+    },
+    {
+      label: "Programs",
+      value: stats.programs,
+      detail: "Distinct study programs",
+      icon: "PR",
+      tone: "violet",
+    },
+    {
+      label: "Year levels",
+      value: stats.yearLevels,
+      detail: "Different study years",
+      icon: "YR",
+      tone: "amber",
+    },
+  ];
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.js
-            </code>{" "}
-            file.
+    <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <section className="mb-8 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+        <div>
+          <p className="mb-2 text-sm font-semibold uppercase tracking-[0.16em] text-blue-700">
+            Student records
+          </p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+            Dashboard
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="mt-2 max-w-2xl text-slate-600">
+            Keep your student directory organized and up to date.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+        <Link
+          href="/students/new"
+          className="inline-flex min-h-11 items-center justify-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
+        >
+          <span aria-hidden="true" className="mr-2 text-lg leading-none">
+            +
+          </span>
+          Add student
+        </Link>
+      </section>
+
+      <section
+        aria-label="Student statistics"
+        className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3"
+      >
+        {metrics.map((metric) => (
+          <article
+            key={metric.label}
+            className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <div
+              className={`flex size-12 shrink-0 items-center justify-center rounded-xl text-xs font-bold tracking-wide ${
+                metric.tone === "blue"
+                  ? "bg-blue-100 text-blue-800"
+                  : metric.tone === "violet"
+                    ? "bg-violet-100 text-violet-800"
+                    : "bg-amber-100 text-amber-800"
+              }`}
+            >
+              {metric.icon}
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500">
+                {metric.label}
+              </p>
+              <p className="mt-0.5 text-2xl font-bold text-slate-950">
+                {metric.value}
+              </p>
+              <p className="text-xs text-slate-500">{metric.detail}</p>
+            </div>
+          </article>
+        ))}
+      </section>
+
+      <WeatherCard />
+
+      <section>
+        <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+          <div>
+            <h2 className="text-xl font-bold text-slate-950">Student directory</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              {stats.totalStudents} registered{" "}
+              {stats.totalStudents === 1 ? "student" : "students"}.
+            </p>
+          </div>
+          <Link
+            href="/students"
+            className="text-sm font-semibold text-blue-700 hover:text-blue-900"
           >
-            Documentation
-          </a>
+            Manage students <span aria-hidden="true">→</span>
+          </Link>
         </div>
-      </main>
-    </div>
+        {students.length > 0 ? (
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
+            {students.map((student, index) => (
+              <StudentCard
+                key={student.id}
+                student={student}
+                imageSrc={studentPhotos[index % studentPhotos.length]}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+            <h3 className="font-semibold text-slate-900">No students yet</h3>
+            <p className="mt-2 text-sm text-slate-600">
+              Add a student with the registration form or insert student records
+              into the <code>student_management_app.students</code> table.
+            </p>
+          </div>
+        )}
+      </section>
+    </main>
+  );
+}
+
+function DashboardLoading() {
+  return (
+    <main
+      aria-label="Loading student dashboard"
+      aria-busy="true"
+      className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8"
+    >
+      <div className="h-9 w-56 animate-pulse rounded bg-slate-200" />
+      <div className="mt-7 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {[1, 2, 3].map((item) => (
+          <div
+            key={item}
+            className="h-28 animate-pulse rounded-xl border border-slate-200 bg-white"
+          />
+        ))}
+      </div>
+      <div className="mt-7 h-64 animate-pulse rounded-xl border border-slate-200 bg-white" />
+    </main>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <DashboardContent />
+    </Suspense>
   );
 }
